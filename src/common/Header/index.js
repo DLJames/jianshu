@@ -20,21 +20,51 @@ import { Action } from './store';
 const mapStateToProps = (state, ownProps) => {
   // const focus = state.get('header').get('focus');
   const focus = state.getIn(['header', 'focus']);
+  const mouseIn = state.getIn(['header', 'mouseIn']);
   const list = state.getIn(['header', 'list']);
+  const page = state.getIn(['header', 'page']);
+  const totalPage = state.getIn(['header', 'totalPage']);
   return {
     focus,
-    list
+    mouseIn,
+    list,
+    page,
+    totalPage
   }
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    handleInputFocus() {
-      dispatch(Action.getList(true));
+    handleInputFocus(list) {
+      (list.size === 0) && dispatch(Action.getList(true));
       dispatch(Action.handleInputFocus(true));
     },
     handleInputBlur() {
       dispatch(Action.handleInputFocus(false));
+    },
+    handleMouseEnter() {
+      dispatch(Action.mouseEnter());
+    },
+    handleMouseLeave() {
+      dispatch(Action.mouseLeave());
+    },
+    handlePageChange(page, totalPage, spinIcon) {
+      let newPage = page;
+      if(newPage < totalPage) {
+        newPage++;
+      }
+      if(newPage === totalPage) {
+        newPage = 1
+      }
+      dispatch(Action.chanePage(newPage));
+      let originAngel = spinIcon.style.transform.replace(/[^0-9]/ig, '');
+
+      if(originAngel) {
+        originAngel = parseInt(originAngel);
+      }else {
+        originAngel = 0;
+      }
+      spinIcon.style.transform = 'rotate(' + originAngel + 360 + 'deg)';
     }
   }
 };
@@ -42,7 +72,7 @@ const mapDispatchToProps = (dispatch) => {
 class Header extends React.Component {
   
   render() {
-    const { focus, handleInputFocus, handleInputBlur } = this.props;
+    const { focus, list, handleInputFocus, handleInputBlur } = this.props;
     return (
       <HeaderWrapper>
         <Logo href="/" logoPic={logoPic} />
@@ -56,11 +86,11 @@ class Header extends React.Component {
           <NavSearchWrapper>
             <NavSearch
               className={focus ? 'focused' : ''}
-              onFocus={handleInputFocus}
+              onFocus={() => handleInputFocus(list)}
               onBlur={handleInputBlur}
             ></NavSearch>
             <i className={focus ? 'focused iconfont search-btn' : 'iconfont search-btn'}>&#xe64d;</i>
-            {this.getListArea(focus)}
+            {this.getListArea()}
           </NavSearchWrapper>
         </Nav>
         <Addition>
@@ -74,23 +104,34 @@ class Header extends React.Component {
     );
   }
 
-  getListArea(show) {
-    if (show) {
+  getListArea() {
+    const { focus, mouseIn, list, page, totalPage, handleMouseEnter, handleMouseLeave, handlePageChange } = this.props;
+    const pageList = [];
+    const newList = list.toJS();
+
+    if(!newList.length) {
+      return;
+    }
+
+    for(let i = (page - 1) * 10; i < page * 10; i++) {
+      pageList.push(<SearchInfoItem key={newList[i].id}>{newList[i].name}</SearchInfoItem>);
+    }
+
+    if (focus || mouseIn) {
       return (
-        <SearchInfo>
+        <SearchInfo 
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <SearchInfoTitle>
             热门搜索
-                <SearchInfoSwitch>
-              <i className="iconfont">&#xe65f;</i>
+            <SearchInfoSwitch onClick={() => handlePageChange(page, totalPage, this.spinIcon)}>
+              <i ref={(icon)=>{this.spinIcon=icon}} className="iconfont spin">&#xe65f;</i>
               换一批
-                </SearchInfoSwitch>
+            </SearchInfoSwitch>
           </SearchInfoTitle>
           <div>
-            {
-              this.props.list.map((item) => {
-                return <SearchInfoItem key={item.id}>{item.name}</SearchInfoItem>;
-              })
-            }
+            {pageList}
           </div>
         </SearchInfo>
       );
