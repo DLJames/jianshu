@@ -14,6 +14,7 @@ import {
   Button,
   NavSearchWrapper
 } from './style';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Action } from './store';
 
@@ -75,7 +76,9 @@ class Header extends React.Component {
     const { focus, list, handleInputFocus, handleInputBlur } = this.props;
     return (
       <HeaderWrapper>
-        <Logo href="/" logoPic={logoPic} />
+        <Link to="/">
+          <Logo logoPic={logoPic} />
+        </Link>
         <Nav>
           <NavItem className="left active">首页</NavItem>
           <NavItem className="left app-download">App下载</NavItem>
