@@ -16,7 +16,7 @@ class List extends React.PureComponent {
         <ListWrapper>
           {
             list.map((item, idx) => (
-              <Link key={idx} to="/detail">
+              <Link key={idx} to={'/detail/' + item.get('id')}>
                 <ListItem>
                   <div className="list-left">
                     <h3>{item.get('title')}</h3>

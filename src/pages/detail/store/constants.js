@@ -1,0 +1,1 @@
+export const INIT_DATA = 'detail/init_data';
