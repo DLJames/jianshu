@@ -17,6 +17,7 @@ import {
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Action } from './store';
+import { Action as LoginAction } from '../../pages/login/store';
 
 const mapStateToProps = (state, ownProps) => {
   // const focus = state.get('header').get('focus');
@@ -25,12 +26,14 @@ const mapStateToProps = (state, ownProps) => {
   const list = state.getIn(['header', 'list']);
   const page = state.getIn(['header', 'page']);
   const totalPage = state.getIn(['header', 'totalPage']);
+  const login = state.getIn(['login', 'login']);
   return {
     focus,
     mouseIn,
     list,
     page,
-    totalPage
+    totalPage,
+    login
   }
 };
 
@@ -66,6 +69,9 @@ const mapDispatchToProps = (dispatch) => {
         originAngel = 0;
       }
       spinIcon.style.transform = 'rotate(' + originAngel + 360 + 'deg)';
+    },
+    hanldeLogout() {
+      dispatch(LoginAction.handleLogout());
     }
   }
 };
@@ -73,7 +79,7 @@ const mapDispatchToProps = (dispatch) => {
 class Header extends React.Component {
   
   render() {
-    const { focus, list, handleInputFocus, handleInputBlur } = this.props;
+    const { focus, list, login, handleInputFocus, handleInputBlur, hanldeLogout } = this.props;
     return (
       <HeaderWrapper>
         <Link to="/">
@@ -82,7 +88,11 @@ class Header extends React.Component {
         <Nav>
           <NavItem className="left active">首页</NavItem>
           <NavItem className="left app-download">App下载</NavItem>
-          <NavItem className="right">登录</NavItem>
+          {
+            login ? 
+              <NavItem onClick={hanldeLogout} className="right">退出</NavItem> : 
+              <Link to="/login"><NavItem className="right">登录</NavItem></Link>
+          }
           <NavItem className="right">
             <i className="iconfont">&#xe636;</i>
           </NavItem>
@@ -97,10 +107,12 @@ class Header extends React.Component {
           </NavSearchWrapper>
         </Nav>
         <Addition>
-          <Button className="writting">
-            <i className="iconfont">&#xe615;</i>
-            写文章
-          </Button>
+          <Link to="/write">
+            <Button className="writting">
+              <i className="iconfont">&#xe615;</i>
+              写文章
+            </Button>
+          </Link>
           <Button className="reg">注册</Button>
         </Addition>
       </HeaderWrapper>
